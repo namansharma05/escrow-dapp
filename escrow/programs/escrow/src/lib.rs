@@ -1,5 +1,9 @@
 use anchor_lang::prelude::*;
 
+mod blueprints;
+mod contexts;
+use contexts::*;
+
 declare_id!("63B271grPqQJSo5VvScRGU5oK5JHkTWxcbVVBxBSmHQm");
 
 #[program]
