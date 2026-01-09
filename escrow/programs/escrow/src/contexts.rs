@@ -11,7 +11,7 @@ pub struct closeAccounts<'info> {
     #[account(
         mut,
         seeds = [b"escrow", authority.key().as_ref()],
-        constraint = authority.key() == escrow_account.buyer,
+        constraint = authority.key() == escrow_account.authority,
         close = authority,
         bump,
     )]
@@ -20,8 +20,7 @@ pub struct closeAccounts<'info> {
     #[account(
         mut,
         mint::decimals = 6,
-        mint::authority = minted_token_account.key(),
-        mint::freeze_authority = minted_token_account.key(),
+        mint::authority = seller_token_account,
         seeds = [b"minted_token_account"],
         bump,
     )]
@@ -39,7 +38,7 @@ pub struct closeAccounts<'info> {
     #[account(
         mut,
         token::mint = minted_token_account,
-        token::authority = authority,
+        token::authority = seller_token_account.owner,
         token::token_program = token_program,
         seeds = [b"seller_token_account"],
         bump,
@@ -67,8 +66,7 @@ pub struct BuyTokens<'info> {
     #[account(
         mut,
         mint::decimals = 6,
-        mint::authority = minted_token_account.key(),
-        mint::freeze_authority = minted_token_account.key(),
+        mint::authority = seller_token_account,
         seeds = [b"minted_token_account"],
         bump,
     )]
@@ -87,7 +85,7 @@ pub struct BuyTokens<'info> {
     #[account(
         mut,
         token::mint = minted_token_account,
-        token::authority = authority,
+        token::authority = seller_token_account.owner,
         seeds = [b"seller_token_account"],
         bump,
     )]
@@ -104,10 +102,8 @@ pub struct CreateMint<'info> {
     #[account(
         init_if_needed,
         payer = authority,
-        mint::decimals = 6,
-        mint::authority = minted_token_account.key(),
-        mint::freeze_authority = minted_token_account.key(),
-        constraint = authority.key() == seller_token_account.owner.key(),
+        mint::decimals = 0,
+        mint::authority = seller_token_account,
         seeds = [b"minted_token_account"],
         bump,
     )]
