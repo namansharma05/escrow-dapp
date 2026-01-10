@@ -3,8 +3,10 @@ use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 
 use crate::blueprints::*;
 
+pub const DEPLOYER: Pubkey = pubkey!("29KKX9fQspSenNUibR9fxJCLvwGfozFPGbt486SF8JqY");
+
 #[derive(Accounts)]
-pub struct closeAccounts<'info> {
+pub struct CloseAccounts<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
@@ -96,7 +98,7 @@ pub struct BuyTokens<'info> {
 
 #[derive(Accounts)]
 pub struct CreateMint<'info> {
-    #[account(mut)]
+    #[account(mut, constraint = authority.key() == DEPLOYER)]
     pub authority: Signer<'info>,
 
     #[account(
@@ -112,10 +114,8 @@ pub struct CreateMint<'info> {
     #[account(
         init_if_needed,
         payer = authority,
-        owner = authority.key(),
         token::mint = minted_token_account,
         token::authority = authority,
-        token::token_program = token_program,
         seeds = [b"seller_token_account"],
         bump,
     )]

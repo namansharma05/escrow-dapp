@@ -21,7 +21,7 @@ pub mod escrow {
         let cpi_accounts = MintTo {
             mint: ctx.accounts.minted_token_account.to_account_info(),
             to: ctx.accounts.seller_token_account.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            authority: ctx.accounts.seller_token_account.to_account_info(),
         };
 
         let cpi_context = CpiContext::new_with_signer(
