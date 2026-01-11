@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::token::{mint_to, MintTo};
 
 mod blueprints;
@@ -33,18 +34,39 @@ pub mod escrow {
         Ok(())
     }
 
-    pub fn buy_tokens(_ctx: Context<BuyTokens>, _token_to_buy: u16) -> Result<()> {
-        // let timestamp = Clock::get()?.unix_timestamp;
-        // let escrow_account = &mut ctx.accounts.escrow_account;
-        // escrow_account.authority = ctx.accounts.authority.key();
-        // escrow_account.timestamp = timestamp;
-        // escrow_account.token_price_lamports = 100_000_000;
+    pub fn buy_tokens(ctx: Context<BuyTokens>, token_to_buy: u64) -> Result<()> {
+        let timestamp = Clock::get()?.unix_timestamp;
+        let escrow_account = &mut ctx.accounts.escrow_account;
+        escrow_account.authority = ctx.accounts.authority.key();
+        escrow_account.timestamp = timestamp;
+        escrow_account.token_price_lamports = 100_000_000;
 
-        // let minted_token_account = &mut ctx.accounts.minted_token_account;
+        let total_lamports_to_transfer = token_to_buy
+            .checked_mul(escrow_account.token_price_lamports)
+            .unwrap();
 
-        // let buyer_token_account = &mut ctx.accounts.buyer_token_account;
-        // let seller_token_account = &mut ctx.accounts.seller_token_account;
+        // WAS TRYING TO USE HELPER FUNCTION HERE
+        // let transfer_ctx = Context::new(ctx.program_id, &mut ctx.accounts., remaining_accounts, bumps)
 
+        // transfer_sol(total_lamports_to_transfer);
+
+        let minted_token_account = &mut ctx.accounts.minted_token_account;
+
+        let buyer_token_account = &mut ctx.accounts.buyer_token_account;
+
+        let seller_token_account = &mut ctx.accounts.seller_token_account;
+
+        Ok(())
+    }
+
+    pub fn transfer_sol(ctx: Context<TransferSol>, sol_amount: u64) -> Result<()> {
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.from.to_account_info(),
+                to: ctx.accounts.to.to_account_info(),
+            },
+        );
         Ok(())
     }
 }

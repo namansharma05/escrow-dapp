@@ -6,6 +6,20 @@ use crate::blueprints::*;
 pub const DEPLOYER: Pubkey = pubkey!("29KKX9fQspSenNUibR9fxJCLvwGfozFPGbt486SF8JqY");
 
 #[derive(Accounts)]
+pub struct TransferSol<'info> {
+    #[account(mut)]
+    pub from: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"escrow", from.key().as_ref()],
+        bump,
+    )]
+    pub to: Account<'info, Escrow>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct CloseAccounts<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -13,7 +27,6 @@ pub struct CloseAccounts<'info> {
     #[account(
         mut,
         seeds = [b"escrow", authority.key().as_ref()],
-        constraint = authority.key() == escrow_account.authority,
         close = authority,
         bump,
     )]
