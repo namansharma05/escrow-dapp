@@ -100,7 +100,6 @@ pub struct BuyTokens<'info> {
 pub struct CreateMint<'info> {
     #[account(mut, constraint = authority.key() == DEPLOYER)]
     pub authority: Signer<'info>,
-
     #[account(
         init_if_needed,
         payer = authority,

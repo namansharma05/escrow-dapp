@@ -2,8 +2,9 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Escrow } from "../target/types/escrow";
 import { Keypair } from "@solana/web3.js";
-import { getAccount, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAccount, getMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import { expect } from "chai";
 
 describe("escrow", () => {
   // Configure the client to use the local cluster.
@@ -15,6 +16,7 @@ describe("escrow", () => {
 
   const adminWallet = (provider.wallet as NodeWallet).payer;
   const tokenProgram = TOKEN_PROGRAM_ID;
+  const newWallet = anchor.web3.Keypair.generate();
 
   let mintedTokenAccountPda: anchor.web3.PublicKey;
   let sellerTokenAccountPda: anchor.web3.PublicKey;
@@ -30,8 +32,10 @@ describe("escrow", () => {
 
   it("should mint new tokens", async () => {
     // Add your test here.
-    console.log("admin wallet public key: ", adminWallet.publicKey.toBase58());
-    console.log("token program: ",tokenProgram.toBase58());
+    console.log("  admin wallet public key: ", adminWallet.publicKey.toBase58());
+    console.log("  token program: ",tokenProgram.toBase58());
+    console.log("  minted token acount pda: ",mintedTokenAccountPda.toBase58());
+    console.log("  seller token account pda: ", sellerTokenAccountPda.toBase58());
     const tokens_to_mint = 100;
     const tx = await program.methods.mintTokens(new anchor.BN(tokens_to_mint)).accounts({
       authority: adminWallet.publicKey,
@@ -40,10 +44,27 @@ describe("escrow", () => {
       sellerTokenAccount: sellerTokenAccountPda,
     }).signers([adminWallet]).rpc();
 
-    console.log("Your transaction signature", tx);
+    console.log("  Your transaction signature", tx);
 
     const sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
+    const mintedTokenAccountData = await getMint(connection, mintedTokenAccountPda);
+    console.log("  minted token account data: ", mintedTokenAccountData);
+    expect(sellerTokenAccountData.amount.toString()).to.equals("100");
+  });
 
-    console.log("Token Balance: ", sellerTokenAccountData.amount.toString());
+  it("should return error when another signer other than deployer try to mint tokens", async()=>{
+    try {
+      const tokens_to_mint = 100;
+      const tx = await program.methods.mintTokens(new anchor.BN(tokens_to_mint)).accounts({
+        authority: adminWallet.publicKey,
+        tokenProgram: tokenProgram,
+        mintedTokenAccount: mintedTokenAccountPda,
+        sellerTokenAccount: sellerTokenAccountPda,
+      }).signers([newWallet]).rpc();
+
+      console.log("  Your transaction signature", tx);
+    } catch (error) {
+      console.error(" error message: ",error.message);
+    }
   });
 });
