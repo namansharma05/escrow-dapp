@@ -20,7 +20,7 @@ pub struct CloseAccounts<'info> {
 
     #[account(
         mut,
-        mint::decimals = 6,
+        mint::decimals = 0,
         mint::authority = seller_token_account,
         seeds = [b"minted_token_account"],
         bump,
@@ -55,27 +55,13 @@ pub struct BuyTokens<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(
-        init,
-        payer = authority,
-        space = 8 + Escrow::INIT_SPACE,
-        seeds = [b"escrow", authority.key().as_ref()],
-        bump,
-    )]
+    #[account(mut)]
     pub escrow_account: Account<'info, Escrow>,
 
-    #[account(
-        init_if_needed,
-        payer = authority,
-        mint::decimals = 0,
-        mint::authority = buyer_token_account,
-        seeds = [b"minted_token_account"],
-        bump,
-    )]
     pub minted_token_account: InterfaceAccount<'info, Mint>,
 
     #[account(
-        init_if_needed,
+        init,
         payer = authority,
         token::mint = minted_token_account,
         token::authority = authority,
@@ -86,8 +72,6 @@ pub struct BuyTokens<'info> {
 
     #[account(
         mut,
-        token::mint = minted_token_account,
-        token::authority = seller_token_account.owner,
         seeds = [b"seller_token_account"],
         bump,
     )]
@@ -111,10 +95,19 @@ pub struct CreateMint<'info> {
     pub minted_token_account: InterfaceAccount<'info, Mint>,
 
     #[account(
+        init,
+        payer = authority,
+        space = 8 + Escrow::INIT_SPACE,
+        seeds = [b"escrow", authority.key().as_ref()],
+        bump,
+    )]
+    pub escrow_account: Account<'info, Escrow>,
+
+    #[account(
         init_if_needed,
         payer = authority,
         token::mint = minted_token_account,
-        token::authority = authority,
+        token::authority = seller_token_account,
         seeds = [b"seller_token_account"],
         bump,
     )]
