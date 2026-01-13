@@ -1,8 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Escrow } from "../target/types/escrow";
-import { Keypair } from "@solana/web3.js";
-import { getAccount, getMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAccount, getMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
 
@@ -20,15 +19,27 @@ describe("escrow", () => {
 
   let mintedTokenAccountPda: anchor.web3.PublicKey;
   let sellerTokenAccountPda: anchor.web3.PublicKey;
+  let buyerTokenAccountPda: anchor.web3.PublicKey;
+  let escrowAccountPda: anchor.web3.PublicKey;
   const findPda = (programId: anchor.web3.PublicKey, seeds: (Buffer | Uint8Array)[]): anchor.web3.PublicKey => {
     const [pda, bump] = anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
     return pda;
   }
 
-  beforeEach(() => {
+  const airDropSol = async(connection: anchor.web3.Connection, publicKey:anchor.web3.PublicKey, sol:number) => {
+    const signature = await connection.requestAirdrop(publicKey, sol);
+    await connection.confirmTransaction(signature, "confirmed");
+  }
+
+  beforeEach(async() => {
     mintedTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("minted_token_account")]);
     sellerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("seller_token_account")]);
+    buyerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("buyer_token_account"), newWallet.publicKey.toBuffer()]);  
+    escrowAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("escrow"), newWallet.publicKey.toBuffer()]);
+    await airDropSol(connection, newWallet.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);  
   })
+
+
 
   it("should mint new tokens", async () => {
     // Add your test here.
@@ -66,5 +77,18 @@ describe("escrow", () => {
     } catch (error) {
       console.error(" error message: ",error.message);
     }
+  });
+
+  it("should transfer sol from buyer token account to escrow account", async() => {
+    const tokens_to_buy = 10;
+    const tx = await program.methods.buyTokens(new anchor.BN(tokens_to_buy)).accounts({
+      authority: newWallet.publicKey,
+      tokenProgram: tokenProgram,
+      buyerTokenAccount: buyerTokenAccountPda,
+      sellerTokenAccount: sellerTokenAccountPda,
+      escrowAccount: escrowAccountPda,
+    }).signers([newWallet]).rpc();
+
+    console.log("  Your transaction signature", tx);
   });
 });
