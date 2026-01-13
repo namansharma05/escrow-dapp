@@ -15,6 +15,10 @@ pub mod escrow {
     use super::*;
 
     pub fn mint_tokens(ctx: Context<CreateMint>, token_amount_to_mint: u64) -> Result<()> {
+        let escrow_account = &mut ctx.accounts.escrow_account;
+        escrow_account.authority = ctx.accounts.authority.key();
+        escrow_account.token_price_lamports = 100_000_000;
+
         let mint_authority_seeds = &[
             b"seller_token_account".as_ref(),
             &[ctx.bumps.seller_token_account],
@@ -32,13 +36,11 @@ pub mod escrow {
             signer_seeds,
         );
         mint_to(cpi_context, token_amount_to_mint)?;
-        let escrow_account = &mut ctx.accounts.escrow_account;
-        escrow_account.authority = ctx.accounts.authority.key();
-        escrow_account.token_price_lamports = 100_000_000;
         Ok(())
     }
 
     pub fn buy_tokens(ctx: Context<BuyTokens>, token_to_buy: u64) -> Result<()> {
+        // transfer SOL buyer_account to escrow_account
         let total_lamports_to_transfer = token_to_buy
             .checked_mul(ctx.accounts.escrow_account.token_price_lamports)
             .unwrap();
@@ -53,6 +55,7 @@ pub mod escrow {
 
         anchor_lang::system_program::transfer(cpi_context, total_lamports_to_transfer)?;
 
+        // transfer tokens from seller_token_account to buyer_token_account
         let seller_seeds = &[
             b"seller_token_account".as_ref(),
             &[ctx.bumps.seller_token_account],
@@ -71,6 +74,14 @@ pub mod escrow {
 
         anchor_spl::token::transfer(transfer_token_cpi_context, token_to_buy)?;
 
+        //transfer SOL from escrow_account to seller_account
+        // let cpi_context2 = CpiContext::new(
+        //     ctx.accounts.system_program.to_account_info(),
+        //     Transfer {
+        //         from: ctx.accounts.escrow_account.to_account_info(),
+        //         to:
+        //     }
+        // )
         Ok(())
     }
 }

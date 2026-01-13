@@ -12,7 +12,7 @@ pub struct CloseAccounts<'info> {
 
     #[account(
         mut,
-        seeds = [b"escrow", authority.key().as_ref()],
+        seeds = [b"escrow"],
         close = authority,
         bump,
     )]
@@ -55,7 +55,11 @@ pub struct BuyTokens<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"escrow"],
+        bump,
+    )]
     pub escrow_account: Account<'info, Escrow>,
 
     pub minted_token_account: InterfaceAccount<'info, Mint>,
@@ -98,7 +102,7 @@ pub struct CreateMint<'info> {
         init,
         payer = authority,
         space = 8 + Escrow::INIT_SPACE,
-        seeds = [b"escrow", authority.key().as_ref()],
+        seeds = [b"escrow"],
         bump,
     )]
     pub escrow_account: Account<'info, Escrow>,

@@ -21,7 +21,6 @@ describe("escrow", () => {
   let sellerTokenAccountPda: anchor.web3.PublicKey;
   let buyerTokenAccountPda: anchor.web3.PublicKey;
   let escrowAccountPda: anchor.web3.PublicKey;
-  let buyerMintedTokenAccountPda: anchor.web3.PublicKey;
   const findPda = (programId: anchor.web3.PublicKey, seeds: (Buffer | Uint8Array)[]): anchor.web3.PublicKey => {
     const [pda, bump] = anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
     return pda;
@@ -35,8 +34,8 @@ describe("escrow", () => {
   beforeEach(async() => {
     mintedTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("minted_token_account")]);
     sellerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("seller_token_account")]);
-    buyerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("buyer_token_account"), adminWallet.publicKey.toBuffer()]);  
-    escrowAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("escrow"), adminWallet.publicKey.toBuffer()]);
+    buyerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("buyer_token_account"), newWallet.publicKey.toBuffer()]);  
+    escrowAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("escrow")]);
     await airDropSol(connection, newWallet.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);  
   })
 
@@ -84,13 +83,13 @@ describe("escrow", () => {
   it("should transfer sol from buyer token account to escrow account", async() => {
     const tokens_to_buy = 10;
     const tx = await program.methods.buyTokens(new anchor.BN(tokens_to_buy)).accounts({
-      authority: adminWallet.publicKey,
+      authority: newWallet.publicKey,
       tokenProgram: tokenProgram,
       buyerTokenAccount: buyerTokenAccountPda,
       sellerTokenAccount: sellerTokenAccountPda,
       mintedTokenAccount: mintedTokenAccountPda,
       escrowAccount: escrowAccountPda,
-    }).signers([adminWallet]).rpc();
+    }).signers([newWallet]).rpc();
 
     console.log("  Your transaction signature", tx);
 
