@@ -6,5 +6,4 @@ pub struct Escrow {
     pub sol_in_lamports: u64,
     pub token_price_lamports: u64,
     pub authority: Pubkey,
-    pub timestamp: i64,
 }
