@@ -16,11 +16,13 @@ describe("escrow", () => {
   const adminWallet = (provider.wallet as NodeWallet).payer;
   const tokenProgram = TOKEN_PROGRAM_ID;
   const newWallet = anchor.web3.Keypair.generate();
+  const thirdWallet = anchor.web3.Keypair.generate();
 
   let mintedTokenAccountPda: anchor.web3.PublicKey;
   let sellerTokenAccountPda: anchor.web3.PublicKey;
   let buyerTokenAccountPda: anchor.web3.PublicKey;
   let escrowAccountPda: anchor.web3.PublicKey;
+  let thirdBuyerTokenAccountPda: anchor.web3.PublicKey;
   const findPda = (programId: anchor.web3.PublicKey, seeds: (Buffer | Uint8Array)[]): anchor.web3.PublicKey => {
     const [pda, bump] = anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
     return pda;
@@ -35,8 +37,10 @@ describe("escrow", () => {
     mintedTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("minted_token_account")]);
     sellerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("seller_token_account")]);
     buyerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("buyer_token_account"), newWallet.publicKey.toBuffer()]);  
+    thirdBuyerTokenAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("buyer_token_account"), thirdWallet.publicKey.toBuffer()]);   
     escrowAccountPda = findPda(program.programId, [anchor.utils.bytes.utf8.encode("escrow")]);
     await airDropSol(connection, newWallet.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);  
+    await airDropSol(connection, thirdWallet.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);  
   })
 
 
@@ -100,14 +104,36 @@ describe("escrow", () => {
 
     console.log("  Your transaction signature", tx);
     const buyerBalanceAfter = await connection.getBalance(newWallet.publicKey);
-    const escrowBalanceAfter = await connection.getBalance(escrowAccountPda);
+    let escrowBalanceAfter = await connection.getBalance(escrowAccountPda);
     console.log("  Buyer balance after: ", buyerBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
     console.log("  escrow balance after: ", escrowBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
-    const buyerTokenAccountData = await getAccount(connection, buyerTokenAccountPda);
+    let buyerTokenAccountData = await getAccount(connection, buyerTokenAccountPda);
     console.log("  buyer token account data: ", buyerTokenAccountData);
-    const sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
+    let sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
     console.log("  seller token account data: ", sellerTokenAccountData);
-    const adminwalletBalanceAfter = await connection.getBalance(adminWallet.publicKey);
+    let adminwalletBalanceAfter = await connection.getBalance(adminWallet.publicKey);
     console.log("  admin wallet balance after: ", adminwalletBalanceAfter/ anchor.web3.LAMPORTS_PER_SOL, " SOL");
+
+    const tx2 = await program.methods.buyTokens(new anchor.BN(10)).accounts({
+      authority: thirdWallet.publicKey,
+      adminWallet: adminWallet.publicKey,
+      tokenProgram: tokenProgram,
+      buyerTokenAccount: thirdBuyerTokenAccountPda,
+      sellerTokenAccount: sellerTokenAccountPda,
+      mintedTokenAccount: mintedTokenAccountPda,
+      escrowAccount: escrowAccountPda,
+    }).signers([thirdWallet]).rpc();
+
+    console.log("  Your transaction signature", tx2);
+    const thirdBuyerBalanceAfter = await connection.getBalance(thirdWallet.publicKey);
+    escrowBalanceAfter = await connection.getBalance(escrowAccountPda);
+    console.log("  third Buyer balance after: ", thirdBuyerBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    console.log("  escrow balance after third buyer: ", escrowBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    buyerTokenAccountData = await getAccount(connection, thirdBuyerTokenAccountPda);
+    console.log("  third buyer token account data after third buyer: ", buyerTokenAccountData);
+    sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
+    console.log("  seller token account data after third buyer : ", sellerTokenAccountData);
+    adminwalletBalanceAfter = await connection.getBalance(adminWallet.publicKey);
+    console.log("  admin wallet balance after after third buyer: ", adminwalletBalanceAfter/ anchor.web3.LAMPORTS_PER_SOL, " SOL");
   });
 });
