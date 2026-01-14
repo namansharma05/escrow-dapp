@@ -81,9 +81,16 @@ describe("escrow", () => {
   });
 
   it("should transfer sol from buyer token account to escrow account", async() => {
-    const tokens_to_buy = 10;
+    const buyerBalanceBefore = await connection.getBalance(newWallet.publicKey);
+    const escrowBalanceBefore = await connection.getBalance(escrowAccountPda);
+    const adminwalletBalanceBefore = await connection.getBalance(adminWallet.publicKey);
+    console.log("  admin wallet balance before: ", adminwalletBalanceBefore/anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    console.log("  Buyer balance before: ", buyerBalanceBefore / anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    console.log("  escrow balance before: ", escrowBalanceBefore / anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    const tokens_to_buy = 20;
     const tx = await program.methods.buyTokens(new anchor.BN(tokens_to_buy)).accounts({
       authority: newWallet.publicKey,
+      adminWallet: adminWallet.publicKey,
       tokenProgram: tokenProgram,
       buyerTokenAccount: buyerTokenAccountPda,
       sellerTokenAccount: sellerTokenAccountPda,
@@ -92,10 +99,15 @@ describe("escrow", () => {
     }).signers([newWallet]).rpc();
 
     console.log("  Your transaction signature", tx);
-
+    const buyerBalanceAfter = await connection.getBalance(newWallet.publicKey);
+    const escrowBalanceAfter = await connection.getBalance(escrowAccountPda);
+    console.log("  Buyer balance after: ", buyerBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
+    console.log("  escrow balance after: ", escrowBalanceAfter / anchor.web3.LAMPORTS_PER_SOL, " SOL");
     const buyerTokenAccountData = await getAccount(connection, buyerTokenAccountPda);
     console.log("  buyer token account data: ", buyerTokenAccountData);
     const sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
     console.log("  seller token account data: ", sellerTokenAccountData);
+    const adminwalletBalanceAfter = await connection.getBalance(adminWallet.publicKey);
+    console.log("  admin wallet balance after: ", adminwalletBalanceAfter/ anchor.web3.LAMPORTS_PER_SOL, " SOL");
   });
 });
