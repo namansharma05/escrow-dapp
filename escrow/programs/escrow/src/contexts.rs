@@ -64,6 +64,13 @@ pub struct BuyTokens<'info> {
 
     pub minted_token_account: InterfaceAccount<'info, Mint>,
 
+    /// CHECK: This is the admin wallet that receives SOL payments
+    #[account(
+        mut,
+        constraint = admin_wallet.key() == DEPLOYER
+    )]
+    pub admin_wallet: AccountInfo<'info>,
+
     #[account(
         init,
         payer = authority,

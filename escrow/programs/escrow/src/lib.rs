@@ -75,13 +75,16 @@ pub mod escrow {
         anchor_spl::token::transfer(transfer_token_cpi_context, token_to_buy)?;
 
         //transfer SOL from escrow_account to seller_account
-        // let cpi_context2 = CpiContext::new(
-        //     ctx.accounts.system_program.to_account_info(),
-        //     Transfer {
-        //         from: ctx.accounts.escrow_account.to_account_info(),
-        //         to:
-        //     }
-        // )
+        **ctx
+            .accounts
+            .escrow_account
+            .to_account_info()
+            .try_borrow_mut_lamports()? -= total_lamports_to_transfer;
+        **ctx
+            .accounts
+            .admin_wallet
+            .to_account_info()
+            .try_borrow_mut_lamports()? += total_lamports_to_transfer;
         Ok(())
     }
 }
