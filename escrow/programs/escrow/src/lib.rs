@@ -7,7 +7,7 @@ mod contexts;
 mod errors;
 use contexts::*;
 
-declare_id!("63B271grPqQJSo5VvScRGU5oK5JHkTWxcbVVBxBSmHQm");
+declare_id!("3tijkZL7w4QJnKsFJEgjiF4QP9EjGiPxyBfaNzd9kEEQ");
 
 #[program]
 pub mod escrow {

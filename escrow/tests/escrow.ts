@@ -63,8 +63,11 @@ describe("escrow", () => {
     console.log("  Your transaction signature", tx);
 
     const sellerTokenAccountData = await getAccount(connection, sellerTokenAccountPda);
+    console.log("  seller token account data: ", sellerTokenAccountData);
     const mintedTokenAccountData = await getMint(connection, mintedTokenAccountPda);
     console.log("  minted token account data: ", mintedTokenAccountData);
+    const escrowAccountData = await program.account.escrow.fetch(escrowAccountPda);
+    console.log("  escrow account data: ", escrowAccountData);
     expect(sellerTokenAccountData.amount.toString()).to.equals("100");
   });
 
