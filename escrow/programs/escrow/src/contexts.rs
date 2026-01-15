@@ -72,7 +72,7 @@ pub struct BuyTokens<'info> {
     pub admin_wallet: AccountInfo<'info>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = authority,
         token::mint = minted_token_account,
         token::authority = authority,
@@ -106,7 +106,7 @@ pub struct CreateMint<'info> {
     pub minted_token_account: InterfaceAccount<'info, Mint>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = authority,
         space = 8 + Escrow::INIT_SPACE,
         seeds = [b"escrow"],
