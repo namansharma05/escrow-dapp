@@ -23,7 +23,7 @@ Backend: Anchor (Rust) + Solana SPL Tokens
 Testing: Anchor test framework + Chai
 
 # 📁 Project Structure
-
+```
 escrow-dapp/
 ├── client/ # Next.js frontend
 │ ├── app/ # App Router pages
@@ -39,7 +39,7 @@ escrow-dapp/
 ├── tests/ # Anchor tests (escrow.ts)
 ├── README.md
 └── package.json
-
+```
 # 🚀 Quick Start
 
 1. Clone & Install
@@ -57,5 +57,6 @@ cd ../ && anchor build
 cp client/.env.example client/.env.local
 ```
 
-`solana-test-validator` 3. Deploy Program
-`anchor deploy`
+```solana-test-validator```
+3. Deploy Program
+```anchor deploy```
