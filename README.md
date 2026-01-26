@@ -1,28 +1,23 @@
-## Solana Escrow DApp
+# Solana Escrow DApp
 
 A full-stack Solana escrow marketplace built with Anchor, React, Next.js, and Tailwind CSS. Users can mint SED tokens (admin-only) and buy tokens with SOL via escrow.
 
-# ✨ Features
+## Features
 
-Admin Panel: Mint new SED tokens (deployer wallet only)
+- Admin Panel: Mint new SED tokens (deployer wallet only)
+- Token Store: Buy SED tokens with SOL (PDA escrow)
+- Wallet Authentication: Phantom/Solflare wallet integration
+- Token Balance Checks: Real-time seller token availability
+- Responsive UI: Tailwind CSS + mobile-first design
+- PDA Token Accounts: Program-Derived Addresses for seller/buyer tokens
 
-Token Store: Buy SED tokens with SOL (PDA escrow)
+## Tech Stack
 
-Wallet Authentication: Phantom/Solflare wallet integration
+- Frontend: Next.js 14 (App Router) + TypeScript + Tailwind CSS + @solana/wallet-adapter
+- Backend: Anchor (Rust) + Solana SPL Tokens
+- Testing: Anchor test framework
 
-Token Balance Checks: Real-time seller token availability
-
-Responsive UI: Tailwind CSS + mobile-first design
-
-PDA Token Accounts: Program-Derived Addresses for seller/buyer tokens
-
-# 🛠 Tech Stack
-
-Frontend: Next.js 14 (App Router) + TypeScript + Tailwind CSS + @solana/wallet-adapter
-Backend: Anchor (Rust) + Solana SPL Tokens
-Testing: Anchor test framework + Chai
-
-# 📁 Project Structure
+## Project Structure
 ```
 escrow-dapp/
 ├── client/ # Next.js frontend
@@ -40,7 +35,7 @@ escrow-dapp/
 ├── README.md
 └── package.json
 ```
-# 🚀 Quick Start
+## Quick Start
 
 1. Clone & Install
 
@@ -57,6 +52,8 @@ cd ../ && anchor build
 cp client/.env.example client/.env.local
 ```
 
-```solana-test-validator```
 3. Deploy Program
-```anchor deploy```
+```
+solana-test-validator
+anchor deploy
+```
