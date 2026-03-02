@@ -39,7 +39,7 @@ export const Escrow: FC<EscrowProps> = ({ publicKey }) => {
   const getProvider = () => {
     if (!wallet) return null;
 
-    const network = "http://127.0.0.1:8899";
+    const network = "https://api.devnet.solana.com";
     const connection = new Connection(network, "processed");
 
     const provider = new anchor.AnchorProvider(
