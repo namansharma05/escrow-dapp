@@ -27,7 +27,8 @@ if (!adminKey) {
 const ADMIN_KEY = new PublicKey(adminKey);
 
 export const Escrow: FC<EscrowProps> = ({ publicKey }) => {
-  const [showMiniting, setShowMinting] = useState(false);
+  const [showMinting, setShowMinting] = useState(false);
+
   const [tokenToMint, setTokenToMint] = useState<number | "">("");
   const [tokenToBuy, setTokenToBuy] = useState<number | "">("");
   const [tokenLeft, setTokenLeft] = useState<number | "">("");
@@ -228,71 +229,93 @@ export const Escrow: FC<EscrowProps> = ({ publicKey }) => {
     }
   };
   return (
-    <div className="">
+    <div className="flex flex-col items-center w-full max-w-4xl mx-auto px-4 py-8">
       {publicKey?.toBase58() == ADMIN_KEY.toBase58() ? (
-        <div>
+        <div className="flex gap-4 mb-8">
           <button
             onClick={handleStoreClick}
-            className="bg-[#512da8] hover:bg-gray-900 text-white h-10 w-25 mr-5 rounded-sm"
+            className={`px-8 py-2 rounded-full border border-white transition-all duration-300 ease-in-out font-medium ${
+              !showMinting
+                ? "bg-white text-black"
+                : "bg-transparent text-white hover:bg-white/10"
+            }`}
           >
             Store
           </button>
           <button
             onClick={handleAdminClick}
-            className="bg-[#512da8] hover:bg-gray-900 text-white h-10 w-25 rounded-sm"
+            className={`px-8 py-2 rounded-full border border-white transition-all duration-300 ease-in-out font-medium ${
+              showMinting
+                ? "bg-white text-black"
+                : "bg-transparent text-white hover:bg-white/10"
+            }`}
           >
             Admin
           </button>
         </div>
       ) : null}
 
-      {showMiniting && publicKey?.toBase58() == ADMIN_KEY.toBase58() ? (
-        <div>
-          <div className="h-30 w-100 bg-[#9172da] mt-4 pt-5 rounded-sm text-white">
+      {showMinting && publicKey?.toBase58() == ADMIN_KEY.toBase58() ? (
+        <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-2xl">
+          <h2 className="text-xl font-bold mb-6 text-white text-center">
+            Mint SED Tokens
+          </h2>
+          <div className="flex flex-col gap-4">
             <input
               type="number"
               min="1"
               value={tokenToMint}
               onChange={handleMintTokenChange}
               placeholder="Enter Tokens To Mint"
-              className="bg-[#512da8] h-20 w-65 mr-5 rounded-lg"
-            ></input>
+              className="bg-black/40 border border-white/10 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            />
             <button
               onClick={mintTokens}
-              className="bg-[#512da8] hover:bg-gray-900 h-20 w-20 rounded-lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/30"
             >
-              MINT
+              MINT TOKENS
             </button>
           </div>
         </div>
       ) : (
-        <div className="h-100 w-100 bg-[#9172da] mt-4 rounded-sm text-white">
-          <div className="flex">
-            <div className="bg-[url(/token-image.jpg)] bg-cover bg-center h-45 w-55 m-5 rounded-lg"></div>
-            <div className="h-45 w-55 bg-[#512da8] mt-5 mr-5 mb-5 rounded-lg flex flex-col items-center justify-center">
-              <p className="text-[22px]">SED TOKEN</p>
-              <div className="text-start">
-                <p>Token Price: {tokenPrice} SOL</p>
-                <p>Token Left: {tokenLeft} SED</p>
+        <div className="w-full max-w-lg bg-white/10 backdrop-blur-lg p-6 md:p-8 rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
+          <div className="flex flex-col md:flex-row gap-6 mb-8">
+            <div className="w-full md:w-1/2 aspect-square bg-[url(/token-image.jpg)] bg-cover bg-center rounded-2xl shadow-inner border border-white/10"></div>
+            <div className="w-full md:w-1/2 bg-purple-900/40 p-6 rounded-2xl flex flex-col items-center justify-center border border-white/5">
+              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-white mb-2">
+                SED TOKEN
+              </p>
+              <div className="space-y-1 text-center text-purple-100">
+                <p className="text-sm opacity-80">Price</p>
+                <p className="font-semibold">{tokenPrice} SOL</p>
+                <div className="h-px w-full bg-white/10 my-2"></div>
+                <p className="text-sm opacity-80">Remaining</p>
+                <p className="font-semibold">{tokenLeft} SED</p>
               </div>
             </div>
           </div>
-          <input
-            type="number"
-            min="1"
-            value={tokenToBuy}
-            onChange={handleBuyTokenChange}
-            placeholder="Enter Tokens To Buy"
-            className="bg-[#512da8] h-20 w-65 mr-5 rounded-lg"
-          ></input>
-          <button
-            onClick={buyTokens}
-            className="bg-[#512da8] hover:bg-gray-900 h-20 w-20 rounded-lg"
-          >
-            BUY
-          </button>
-          <div className="h-15 w-90 bg-[#512da8] mt-5 ml-5 rounded-lg flex justify-center items-center text-xl">
-            You have {tokenYouHave} SED Tokens
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <input
+              type="number"
+              min="1"
+              value={tokenToBuy}
+              onChange={handleBuyTokenChange}
+              placeholder="Total Tokens to Buy"
+              className="flex-grow bg-black/40 border border-white/10 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            />
+            <button
+              onClick={buyTokens}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/30 sm:w-32"
+            >
+              BUY
+            </button>
+          </div>
+
+          <div className="w-full bg-white/5 border border-white/5 py-4 px-6 rounded-xl flex justify-center items-center text-lg font-medium text-purple-200">
+            You have{" "}
+            <span className="mx-2 text-white font-bold">{tokenYouHave}</span>{" "}
+            SED Tokens
           </div>
         </div>
       )}
